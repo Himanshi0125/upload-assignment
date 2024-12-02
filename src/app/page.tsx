@@ -19,22 +19,23 @@ interface ImageData {
   storage_path: string;
 }
 
+// Type assertion for environment variables
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+
+// Initialize Supabase client
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Helper function to get public URL for images
+const getPublicImageUrl = (storage_path: string): string => {
+  const { data } = supabase.storage.from('photos').getPublicUrl(storage_path);
+  return data.publicUrl;
+};
+
 export default function PhotoGallery(): JSX.Element {
   const [images, setImages] = useState<ImageData[]>([]);
   const [uploading, setUploading] = useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-  // Initialize Supabase client inside the component
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
-  );
-
-  // Helper function to get public URL for images
-  const getPublicImageUrl = (storage_path: string): string => {
-    const { data } = supabase.storage.from('photos').getPublicUrl(storage_path);
-    return data.publicUrl;
-  };
 
   // Fetch images on component mount
   useEffect(() => {
